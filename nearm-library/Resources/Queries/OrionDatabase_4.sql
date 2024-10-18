@@ -1,0 +1,1 @@
+select Version from VersionDB

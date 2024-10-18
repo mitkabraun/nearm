@@ -17,9 +17,9 @@ public static class Logger
     private static Task task;
     private static string currentFilename;
 
-    public static void Start(string loggerName = null)
+    public static void Start(string loggerName = "nearm")
     {
-        name = loggerName ?? "nearm";
+        name = loggerName;
         task = Task.Run(Loop);
     }
 
