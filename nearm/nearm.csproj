@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net481</TargetFramework>
+		<Nullable>disable</Nullable>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<LangVersion>latest</LangVersion>
+		<Version>0.0.0.1</Version>
+	</PropertyGroup>
+
+</Project>

@@ -19,12 +19,17 @@ public static partial class Orion
 
     public static void LoadServer(string name)
     {
+        Server = null;
+        Database = null;
         Stopwatch.Restart();
         try
         {
+            Logger.Log($"[ {name} ] Загрузка списка баз данных ...");
+
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Имя не можеть быть пустым.", nameof(name));
+
             Server = new OrionServer(name);
-            Database = null;
-            Logger.Log($"[ {Server.Name} ] Загрузка списка баз данных ...");
 
             if (!ServiceHelper.IsServiceRunning(Server.ServiceName))
                 throw new InvalidOperationException($"Служба Windows: {Server.ServiceName} - не запущена");
@@ -38,14 +43,14 @@ public static partial class Orion
                 Server.Databases.Add(reader.GoString(0));
 
             Logger.Debug(Server.Databases.Count > 0
-                ? $"[ {Server.Name} ] Найдено баз данных: {Server.Databases.Count}"
-                : $"[ {Server.Name} ] Баз данных не обнаружено");
-            Logger.Log($"[ {Server.Name} ] Загрузка списка баз данных завершена за {Stopwatch.ElapsedTime()}");
+                ? $"[ {name} ] Найдено баз данных: {Server.Databases.Count}"
+                : $"[ {name} ] Баз данных не обнаружено");
+            Logger.Log($"[ {name} ] Загрузка списка баз данных завершена за {Stopwatch.ElapsedTime()}");
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            Logger.Error($"[ {Server.Name} ] Загрузка списка баз данных прервана");
+            Logger.Error($"[ {name} ] Загрузка списка баз данных прервана");
         }
         finally
         {
@@ -53,16 +58,24 @@ public static partial class Orion
         }
     }
 
-    public static void LoadDatabase(string name, string username, string password, LoadStrategy strategy)
+    public static void LoadDatabase(string name, string username = "sa", string password = "123456",
+        LoadStrategy strategy = LoadStrategy.Auto)
     {
+        Database = null;
         Stopwatch.Restart();
         try
         {
+            Logger.Log($"[ {name} ] Загрузка базы данных...");
+
+            if (Server == null)
+                throw new InvalidOperationException("Перед загрузкой базы данных загрузите сервер.");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Имя не можеть быть пустым.", nameof(name));
+
             Database = new OrionDatabase(Server, name, username, password, strategy);
-            Logger.Log($"[ {Database.Name} ] Загрузка базы данных...");
 
             if (!Server.Databases.Contains(name))
-                Logger.Error($"База данных {name} отсутствует в списке сервера");
+                Logger.Error($"[ {name} ] База данных отсутствует в списке сервера");
             if (!ServiceHelper.IsServiceRunning(Database.Server.ServiceName))
                 throw new InvalidOperationException($"Служба Windows: {Database.Server.ServiceName} - не запущена");
 
@@ -72,12 +85,12 @@ public static partial class Orion
                 ParseData();
             }
 
-            Logger.Log($"[ {Database.Name} ] Загрузка базы данных завершена за {Stopwatch.ElapsedTime()}");
+            Logger.Log($"[ {name} ] Загрузка базы данных завершена за {Stopwatch.ElapsedTime()}");
         }
         catch (Exception ex)
         {
             Logger.Error(ex);
-            Logger.Error($"[ {Database.Name} ] Загрузка базы данных прервана");
+            Logger.Error($"[ {name} ] Загрузка базы данных прервана");
         }
         finally
         {

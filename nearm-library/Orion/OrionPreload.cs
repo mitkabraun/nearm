@@ -60,18 +60,17 @@ public static partial class Orion
                     reader.Read();
                     var ver = reader.GoString(0);
                     if (Version.TryParse(ver, out var version))
-                    {
                         Database.Version = version;
-                        if (Database.LoadStrategy == LoadStrategy.Auto)
-                            Database.LoadStrategy = Database.Version >= new Version(1, 20, 3, 8)
-                                ? LoadStrategy.New
-                                : LoadStrategy.Old;
-                    }
                     else
                         throw new InvalidOperationException($"Неудалось получить версию базы данных из этого: {ver}");
                 }
             }
         }
+
+        if (Database.LoadStrategy == LoadStrategy.Auto)
+            Database.LoadStrategy = Database.Version >= new Version(1, 20, 3, 8)
+                ? LoadStrategy.New
+                : LoadStrategy.Old;
 
         Logger.Debug($"[ {Database.Name} ] Предзагрузка завершена, версия {Database.Version}, таблиц {Database.Tables}");
         return true;
